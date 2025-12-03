@@ -1,0 +1,682 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chỉ số DO - Oxy Hòa Tan | Environmental Index Calculator</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        
+        * {
+            font-family: 'Inter', sans-serif;
+        }
+        
+        .gradient-bg {
+            background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 50%, #0369a1 100%);
+        }
+        
+        .glass-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .water-animation {
+            background: linear-gradient(180deg, 
+                rgba(14, 165, 233, 0.1) 0%, 
+                rgba(14, 165, 233, 0.05) 100%);
+            animation: wave 3s ease-in-out infinite;
+        }
+        
+        @keyframes wave {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-5px); }
+        }
+        
+        .bubble {
+            position: absolute;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            animation: float 4s ease-in-out infinite;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0) scale(1); opacity: 0.7; }
+            50% { transform: translateY(-20px) scale(1.1); opacity: 1; }
+        }
+        
+        .gauge-container {
+            position: relative;
+            width: 200px;
+            height: 100px;
+            overflow: hidden;
+        }
+        
+        .gauge-bg {
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            background: conic-gradient(
+                #ef4444 0deg 36deg,
+                #f97316 36deg 72deg,
+                #eab308 72deg 108deg,
+                #84cc16 108deg 144deg,
+                #22c55e 144deg 180deg,
+                transparent 180deg 360deg
+            );
+        }
+        
+        .gauge-mask {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            width: 160px;
+            height: 160px;
+            border-radius: 50%;
+            background: white;
+        }
+        
+        .gauge-needle {
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            width: 4px;
+            height: 80px;
+            background: #1e293b;
+            transform-origin: bottom center;
+            transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+            border-radius: 2px;
+        }
+        
+        .gauge-center {
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 20px;
+            height: 20px;
+            background: #1e293b;
+            border-radius: 50%;
+        }
+        
+        .quality-badge {
+            transition: all 0.3s ease;
+        }
+        
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.4); }
+            50% { box-shadow: 0 0 0 15px rgba(34, 197, 94, 0); }
+        }
+        
+        input[type="range"] {
+            -webkit-appearance: none;
+            height: 8px;
+            border-radius: 4px;
+            background: #e2e8f0;
+        }
+        
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #0ea5e9, #0284c7);
+            cursor: pointer;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+        }
+    </style>
+</head>
+<body class="min-h-screen gradient-bg">
+    <!-- Header -->
+    <header class="py-6 px-4">
+        <div class="max-w-6xl mx-auto flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
+                    <i class="fas fa-water text-white text-2xl"></i>
+                </div>
+                <div>
+                    <h1 class="text-white text-2xl font-bold">DO Calculator</h1>
+                    <p class="text-sky-100 text-sm">Dissolved Oxygen Index</p>
+                </div>
+            </div>
+            <div class="hidden md:flex items-center gap-2 text-white/80 text-sm">
+                <i class="fas fa-leaf"></i>
+                <span>Environmental Monitoring System</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="max-w-6xl mx-auto px-4 pb-12">
+        <div class="grid lg:grid-cols-3 gap-6">
+            <!-- Input Panel -->
+            <div class="lg:col-span-1">
+                <div class="glass-card rounded-2xl p-6 shadow-xl">
+                    <h2 class="text-lg font-semibold text-gray-800 mb-6 flex items-center gap-2">
+                        <i class="fas fa-sliders-h text-sky-500"></i>
+                        Thông số đầu vào
+                    </h2>
+                    
+                    <!-- DO Input -->
+                    <div class="mb-6">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            <i class="fas fa-tint text-sky-500 mr-1"></i>
+                            Nồng độ DO đo được (mg/L)
+                        </label>
+                        <div class="flex items-center gap-3">
+                            <input type="range" id="doValue" min="0" max="15" step="0.1" value="7" 
+                                class="flex-1" oninput="updateDO(this.value)">
+                            <input type="number" id="doInput" value="7" min="0" max="20" step="0.1"
+                                class="w-20 px-3 py-2 border border-gray-200 rounded-lg text-center font-semibold text-sky-600"
+                                onchange="updateDOSlider(this.value)">
+                        </div>
+                        <p class="text-xs text-gray-500 mt-1">Phạm vi thông thường: 0 - 15 mg/L</p>
+                    </div>
+                    
+                    <!-- Temperature Input -->
+                    <div class="mb-6">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            <i class="fas fa-thermometer-half text-orange-500 mr-1"></i>
+                            Nhiệt độ nước (°C)
+                        </label>
+                        <div class="flex items-center gap-3">
+                            <input type="range" id="tempValue" min="0" max="40" step="0.5" value="25" 
+                                class="flex-1" oninput="updateTemp(this.value)">
+                            <input type="number" id="tempInput" value="25" min="0" max="45" step="0.5"
+                                class="w-20 px-3 py-2 border border-gray-200 rounded-lg text-center font-semibold text-orange-600"
+                                onchange="updateTempSlider(this.value)">
+                        </div>
+                        <p class="text-xs text-gray-500 mt-1">Phạm vi: 0 - 40 °C</p>
+                    </div>
+                    
+                    <!-- Salinity Input -->
+                    <div class="mb-6">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            <i class="fas fa-flask text-teal-500 mr-1"></i>
+                            Độ mặn (‰ PSU)
+                        </label>
+                        <div class="flex items-center gap-3">
+                            <input type="range" id="salinityValue" min="0" max="40" step="0.5" value="0" 
+                                class="flex-1" oninput="updateSalinity(this.value)">
+                            <input type="number" id="salinityInput" value="0" min="0" max="45" step="0.5"
+                                class="w-20 px-3 py-2 border border-gray-200 rounded-lg text-center font-semibold text-teal-600"
+                                onchange="updateSalinitySlider(this.value)">
+                        </div>
+                        <p class="text-xs text-gray-500 mt-1">Nước ngọt: 0 | Nước biển: ~35</p>
+                    </div>
+                    
+                    <!-- Calculate Button -->
+                    <button onclick="calculateDO()" 
+                        class="w-full py-3 bg-gradient-to-r from-sky-500 to-blue-600 text-white font-semibold rounded-xl hover:from-sky-600 hover:to-blue-700 transition-all shadow-lg hover:shadow-xl flex items-center justify-center gap-2">
+                        <i class="fas fa-calculator"></i>
+                        Tính toán chỉ số DO
+                    </button>
+                </div>
+                
+                <!-- Quick Info -->
+                <div class="glass-card rounded-2xl p-5 mt-6 shadow-xl">
+                    <h3 class="font-semibold text-gray-800 mb-3 flex items-center gap-2">
+                        <i class="fas fa-info-circle text-sky-500"></i>
+                        DO là gì?
+                    </h3>
+                    <p class="text-sm text-gray-600 leading-relaxed">
+                        <strong>Oxy hòa tan (DO)</strong> là lượng oxy có trong nước, đơn vị mg/L. 
+                        DO rất quan trọng cho sự sống của các sinh vật thủy sinh. Nồng độ DO phụ thuộc 
+                        vào nhiệt độ, áp suất và độ mặn của nước.
+                    </p>
+                </div>
+            </div>
+            
+            <!-- Results Panel -->
+            <div class="lg:col-span-2">
+                <!-- Main Result Card -->
+                <div class="glass-card rounded-2xl p-6 shadow-xl mb-6">
+                    <div class="flex flex-wrap items-start justify-between gap-4 mb-6">
+                        <div>
+                            <h2 class="text-lg font-semibold text-gray-800 flex items-center gap-2">
+                                <i class="fas fa-chart-pie text-sky-500"></i>
+                                Kết quả phân tích
+                            </h2>
+                            <p class="text-sm text-gray-500 mt-1">Đánh giá chất lượng nước theo chỉ số DO</p>
+                        </div>
+                        <div id="qualityBadge" class="quality-badge px-4 py-2 rounded-full text-sm font-semibold bg-green-100 text-green-700">
+                            <i class="fas fa-check-circle mr-1"></i>
+                            Tốt
+                        </div>
+                    </div>
+                    
+                    <div class="grid md:grid-cols-2 gap-6">
+                        <!-- Gauge -->
+                        <div class="flex flex-col items-center">
+                            <div class="gauge-container mb-4">
+                                <div class="gauge-bg"></div>
+                                <div class="gauge-mask"></div>
+                                <div id="gaugeNeedle" class="gauge-needle" style="transform: rotate(-90deg);"></div>
+                                <div class="gauge-center"></div>
+                            </div>
+                            <div class="text-center">
+                                <div class="text-4xl font-bold text-gray-800" id="saturationValue">85%</div>
+                                <div class="text-sm text-gray-500">Độ bão hòa DO</div>
+                            </div>
+                        </div>
+                        
+                        <!-- Stats -->
+                        <div class="space-y-4">
+                            <div class="bg-sky-50 rounded-xl p-4">
+                                <div class="flex items-center justify-between">
+                                    <span class="text-sm text-gray-600">DO đo được</span>
+                                    <span class="text-xl font-bold text-sky-600" id="resultDO">7.0 mg/L</span>
+                                </div>
+                            </div>
+                            <div class="bg-orange-50 rounded-xl p-4">
+                                <div class="flex items-center justify-between">
+                                    <span class="text-sm text-gray-600">DO bão hòa (theo T°)</span>
+                                    <span class="text-xl font-bold text-orange-600" id="resultDOsat">8.26 mg/L</span>
+                                </div>
+                            </div>
+                            <div class="bg-teal-50 rounded-xl p-4">
+                                <div class="flex items-center justify-between">
+                                    <span class="text-sm text-gray-600">Thiếu hụt DO</span>
+                                    <span class="text-xl font-bold text-teal-600" id="resultDeficit">1.26 mg/L</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Chart & Standards -->
+                <div class="grid md:grid-cols-2 gap-6">
+                    <!-- Chart -->
+                    <div class="glass-card rounded-2xl p-5 shadow-xl">
+                        <h3 class="font-semibold text-gray-800 mb-4 flex items-center gap-2">
+                            <i class="fas fa-chart-line text-sky-500"></i>
+                            Biểu đồ DO bão hòa theo nhiệt độ
+                        </h3>
+                        <canvas id="doChart" height="200"></canvas>
+                    </div>
+                    
+                    <!-- Standards Table -->
+                    <div class="glass-card rounded-2xl p-5 shadow-xl">
+                        <h3 class="font-semibold text-gray-800 mb-4 flex items-center gap-2">
+                            <i class="fas fa-clipboard-list text-sky-500"></i>
+                            Tiêu chuẩn QCVN 08:2023
+                        </h3>
+                        <div class="space-y-2 text-sm">
+                            <div class="flex items-center p-2 rounded-lg bg-green-50 border-l-4 border-green-500">
+                                <span class="w-16 font-semibold text-green-700">A1</span>
+                                <span class="text-gray-600">DO ≥ 6 mg/L - Nước sinh hoạt</span>
+                            </div>
+                            <div class="flex items-center p-2 rounded-lg bg-lime-50 border-l-4 border-lime-500">
+                                <span class="w-16 font-semibold text-lime-700">A2</span>
+                                <span class="text-gray-600">DO ≥ 5 mg/L - Cấp nước sinh hoạt</span>
+                            </div>
+                            <div class="flex items-center p-2 rounded-lg bg-yellow-50 border-l-4 border-yellow-500">
+                                <span class="w-16 font-semibold text-yellow-700">B1</span>
+                                <span class="text-gray-600">DO ≥ 4 mg/L - Tưới tiêu, thủy lợi</span>
+                            </div>
+                            <div class="flex items-center p-2 rounded-lg bg-orange-50 border-l-4 border-orange-500">
+                                <span class="w-16 font-semibold text-orange-700">B2</span>
+                                <span class="text-gray-600">DO ≥ 2 mg/L - Giao thông thủy</span>
+                            </div>
+                            <div class="flex items-center p-2 rounded-lg bg-red-50 border-l-4 border-red-500">
+                                <span class="w-16 font-semibold text-red-700">Kém</span>
+                                <span class="text-gray-600">DO < 2 mg/L - Ô nhiễm nặng</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Aquatic Life Impact -->
+                <div class="glass-card rounded-2xl p-5 mt-6 shadow-xl">
+                    <h3 class="font-semibold text-gray-800 mb-4 flex items-center gap-2">
+                        <i class="fas fa-fish text-sky-500"></i>
+                        Ảnh hưởng đến sinh vật thủy sinh
+                    </h3>
+                    <div class="grid grid-cols-2 md:grid-cols-5 gap-3" id="aquaticImpact">
+                        <div class="text-center p-3 rounded-xl bg-red-100">
+                            <div class="text-2xl mb-1">💀</div>
+                            <div class="text-xs font-semibold text-red-700">0-2 mg/L</div>
+                            <div class="text-xs text-gray-600">Chết hàng loạt</div>
+                        </div>
+                        <div class="text-center p-3 rounded-xl bg-orange-100">
+                            <div class="text-2xl mb-1">😰</div>
+                            <div class="text-xs font-semibold text-orange-700">2-4 mg/L</div>
+                            <div class="text-xs text-gray-600">Stress nặng</div>
+                        </div>
+                        <div class="text-center p-3 rounded-xl bg-yellow-100">
+                            <div class="text-2xl mb-1">😟</div>
+                            <div class="text-xs font-semibold text-yellow-700">4-5 mg/L</div>
+                            <div class="text-xs text-gray-600">Stress nhẹ</div>
+                        </div>
+                        <div class="text-center p-3 rounded-xl bg-lime-100">
+                            <div class="text-2xl mb-1">🐟</div>
+                            <div class="text-xs font-semibold text-lime-700">5-6 mg/L</div>
+                            <div class="text-xs text-gray-600">Chấp nhận</div>
+                        </div>
+                        <div class="text-center p-3 rounded-xl bg-green-100 ring-2 ring-green-400" id="optimalZone">
+                            <div class="text-2xl mb-1">🐠</div>
+                            <div class="text-xs font-semibold text-green-700">> 6 mg/L</div>
+                            <div class="text-xs text-gray-600">Tối ưu</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- History Log -->
+                <div class="glass-card rounded-2xl p-5 mt-6 shadow-xl">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="font-semibold text-gray-800 flex items-center gap-2">
+                            <i class="fas fa-history text-sky-500"></i>
+                            Lịch sử đo gần đây
+                        </h3>
+                        <button onclick="clearHistory()" class="text-sm text-gray-500 hover:text-red-500 transition">
+                            <i class="fas fa-trash-alt mr-1"></i>Xóa
+                        </button>
+                    </div>
+                    <div id="historyLog" class="space-y-2 max-h-48 overflow-y-auto">
+                        <p class="text-sm text-gray-400 text-center py-4">Chưa có dữ liệu</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+    
+    <!-- Footer -->
+    <footer class="py-6 text-center text-white/70 text-sm">
+        <p>© 2024 Environmental Monitoring System | DO Calculator v1.0</p>
+        <p class="mt-1">Dựa trên QCVN 08:2023/BTNMT - Quy chuẩn kỹ thuật quốc gia về chất lượng nước mặt</p>
+    </footer>
+
+    <script>
+        let chart;
+        let history = [];
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            initChart();
+            calculateDO();
+        });
+        
+        // Update functions for sliders
+        function updateDO(value) {
+            document.getElementById('doInput').value = value;
+        }
+        
+        function updateDOSlider(value) {
+            document.getElementById('doValue').value = Math.min(15, Math.max(0, value));
+        }
+        
+        function updateTemp(value) {
+            document.getElementById('tempInput').value = value;
+        }
+        
+        function updateTempSlider(value) {
+            document.getElementById('tempValue').value = Math.min(40, Math.max(0, value));
+        }
+        
+        function updateSalinity(value) {
+            document.getElementById('salinityInput').value = value;
+        }
+        
+        function updateSalinitySlider(value) {
+            document.getElementById('salinityValue').value = Math.min(40, Math.max(0, value));
+        }
+        
+        // Calculate saturated DO using Weiss (1970) equation
+        function calculateDOsat(temp, salinity) {
+            const T = temp + 273.15; // Convert to Kelvin
+            const S = salinity;
+            
+            // Weiss equation coefficients
+            const A1 = -173.4292;
+            const A2 = 249.6339;
+            const A3 = 143.3483;
+            const A4 = -21.8492;
+            const B1 = -0.033096;
+            const B2 = 0.014259;
+            const B3 = -0.0017000;
+            
+            const lnDOsat = A1 + A2 * (100/T) + A3 * Math.log(T/100) + A4 * (T/100) +
+                           S * (B1 + B2 * (T/100) + B3 * Math.pow(T/100, 2));
+            
+            return Math.exp(lnDOsat);
+        }
+        
+        // Main calculation function
+        function calculateDO() {
+            const doMeasured = parseFloat(document.getElementById('doInput').value);
+            const temp = parseFloat(document.getElementById('tempInput').value);
+            const salinity = parseFloat(document.getElementById('salinityInput').value);
+            
+            // Calculate saturated DO
+            const doSat = calculateDOsat(temp, salinity);
+            
+            // Calculate saturation percentage
+            const saturation = (doMeasured / doSat) * 100;
+            
+            // Calculate deficit
+            const deficit = Math.max(0, doSat - doMeasured);
+            
+            // Update UI
+            document.getElementById('resultDO').textContent = doMeasured.toFixed(2) + ' mg/L';
+            document.getElementById('resultDOsat').textContent = doSat.toFixed(2) + ' mg/L';
+            document.getElementById('resultDeficit').textContent = deficit.toFixed(2) + ' mg/L';
+            document.getElementById('saturationValue').textContent = saturation.toFixed(1) + '%';
+            
+            // Update gauge
+            updateGauge(saturation);
+            
+            // Update quality badge
+            updateQualityBadge(doMeasured);
+            
+            // Update chart marker
+            updateChartMarker(temp, doMeasured, doSat);
+            
+            // Highlight aquatic impact zone
+            highlightImpactZone(doMeasured);
+            
+            // Add to history
+            addToHistory(doMeasured, temp, salinity, saturation);
+        }
+        
+        // Update gauge needle
+        function updateGauge(saturation) {
+            const needle = document.getElementById('gaugeNeedle');
+            // Map saturation (0-150%) to angle (-90 to 90 degrees)
+            const clampedSat = Math.min(150, Math.max(0, saturation));
+            const angle = -90 + (clampedSat / 150) * 180;
+            needle.style.transform = `rotate(${angle}deg)`;
+        }
+        
+        // Update quality badge
+        function updateQualityBadge(doValue) {
+            const badge = document.getElementById('qualityBadge');
+            let text, bgClass, icon;
+            
+            if (doValue >= 6) {
+                text = 'Rất tốt (A1)';
+                bgClass = 'bg-green-100 text-green-700';
+                icon = 'check-circle';
+            } else if (doValue >= 5) {
+                text = 'Tốt (A2)';
+                bgClass = 'bg-lime-100 text-lime-700';
+                icon = 'check';
+            } else if (doValue >= 4) {
+                text = 'Trung bình (B1)';
+                bgClass = 'bg-yellow-100 text-yellow-700';
+                icon = 'exclamation';
+            } else if (doValue >= 2) {
+                text = 'Kém (B2)';
+                bgClass = 'bg-orange-100 text-orange-700';
+                icon = 'exclamation-triangle';
+            } else {
+                text = 'Ô nhiễm nặng';
+                bgClass = 'bg-red-100 text-red-700';
+                icon = 'times-circle';
+            }
+            
+            badge.className = `quality-badge px-4 py-2 rounded-full text-sm font-semibold ${bgClass}`;
+            badge.innerHTML = `<i class="fas fa-${icon} mr-1"></i>${text}`;
+            
+            if (doValue >= 6) {
+                badge.classList.add('pulse');
+            } else {
+                badge.classList.remove('pulse');
+            }
+        }
+        
+        // Highlight impact zone
+        function highlightImpactZone(doValue) {
+            const zones = document.querySelectorAll('#aquaticImpact > div');
+            zones.forEach(zone => {
+                zone.classList.remove('ring-2', 'ring-offset-2');
+            });
+            
+            let activeIndex;
+            if (doValue < 2) activeIndex = 0;
+            else if (doValue < 4) activeIndex = 1;
+            else if (doValue < 5) activeIndex = 2;
+            else if (doValue < 6) activeIndex = 3;
+            else activeIndex = 4;
+            
+            const colors = ['ring-red-400', 'ring-orange-400', 'ring-yellow-400', 'ring-lime-400', 'ring-green-400'];
+            zones[activeIndex].classList.add('ring-2', 'ring-offset-2', colors[activeIndex]);
+        }
+        
+        // Initialize chart
+        function initChart() {
+            const ctx = document.getElementById('doChart').getContext('2d');
+            
+            // Generate DO saturation curve data
+            const temps = [];
+            const doSatValues = [];
+            for (let t = 0; t <= 40; t += 2) {
+                temps.push(t);
+                doSatValues.push(calculateDOsat(t, 0));
+            }
+            
+            chart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: temps,
+                    datasets: [{
+                        label: 'DO bão hòa (mg/L)',
+                        data: doSatValues,
+                        borderColor: '#0ea5e9',
+                        backgroundColor: 'rgba(14, 165, 233, 0.1)',
+                        fill: true,
+                        tension: 0.4,
+                        pointRadius: 0
+                    }, {
+                        label: 'Điểm đo hiện tại',
+                        data: [],
+                        borderColor: '#ef4444',
+                        backgroundColor: '#ef4444',
+                        pointRadius: 8,
+                        pointStyle: 'star',
+                        showLine: false
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                boxWidth: 12,
+                                font: { size: 10 }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Nhiệt độ (°C)',
+                                font: { size: 10 }
+                            }
+                        },
+                        y: {
+                            title: {
+                                display: true,
+                                text: 'DO (mg/L)',
+                                font: { size: 10 }
+                            },
+                            min: 0,
+                            max: 16
+                        }
+                    }
+                }
+            });
+        }
+        
+        // Update chart marker
+        function updateChartMarker(temp, doMeasured, doSat) {
+            // Find index for current temp
+            const tempIndex = Math.round(temp / 2);
+            
+            // Update measured point
+            const pointData = new Array(21).fill(null);
+            pointData[tempIndex] = doMeasured;
+            
+            chart.data.datasets[1].data = pointData;
+            chart.update();
+        }
+        
+        // Add to history
+        function addToHistory(doValue, temp, salinity, saturation) {
+            const now = new Date();
+            const timeStr = now.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
+            
+            history.unshift({
+                time: timeStr,
+                do: doValue,
+                temp: temp,
+                salinity: salinity,
+                saturation: saturation
+            });
+            
+            // Keep only last 10 entries
+            if (history.length > 10) history.pop();
+            
+            renderHistory();
+        }
+        
+        // Render history
+        function renderHistory() {
+            const container = document.getElementById('historyLog');
+            
+            if (history.length === 0) {
+                container.innerHTML = '<p class="text-sm text-gray-400 text-center py-4">Chưa có dữ liệu</p>';
+                return;
+            }
+            
+            container.innerHTML = history.map((item, index) => {
+                const qualityColor = item.do >= 6 ? 'text-green-600' : 
+                                    item.do >= 4 ? 'text-yellow-600' : 'text-red-600';
+                return `
+                    <div class="flex items-center justify-between p-2 rounded-lg ${index === 0 ? 'bg-sky-50' : 'bg-gray-50'}">
+                        <span class="text-xs text-gray-500">${item.time}</span>
+                        <span class="font-semibold ${qualityColor}">${item.do.toFixed(1)} mg/L</span>
+                        <span class="text-xs text-gray-500">${item.temp}°C</span>
+                        <span class="text-xs text-gray-500">${item.saturation.toFixed(0)}%</span>
+                    </div>
+                `;
+            }).join('');
+        }
+        
+        // Clear history
+        function clearHistory() {
+            history = [];
+            renderHistory();
+        }
+    </script>
+</body>
+</html>
