@@ -1,682 +1,604 @@
 <!DOCTYPE html>
 <html lang="vi">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chỉ số DO - Oxy Hòa Tan | Environmental Index Calculator</title>
-    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <title>Phạm Văn Hiệp | Giảng viên ĐH Đồng Tháp</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Playfair+Display:wght@400;600;700&display=swap"
+        rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#2356A7',    // User's Blue
+                        secondary: '#107EC2',  // User's Cyan
+                        accent: '#DB2927',     // User's Red
+                        cream: '#F5F5DC',
+                    },
+                    fontFamily: {
+                        sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+                        serif: ['"Playfair Display"', 'serif'],
+                    }
+                }
+            }
+        }
+    </script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
-        
+        :root {
+            --primary: #2356A7;
+            --secondary: #107EC2;
+            --accent: #DB2927;
+        }
+
         * {
-            font-family: 'Inter', sans-serif;
+            scroll-behavior: smooth;
         }
-        
-        .gradient-bg {
-            background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 50%, #0369a1 100%);
+
+        .gradient-hero {
+            background: linear-gradient(135deg, #0f1c3f 0%, #2356A7 40%, #107EC2 100%);
         }
-        
-        .glass-card {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
+
+        .gradient-section {
+            background: linear-gradient(180deg, #f0f7ff 0%, #ffffff 100%);
         }
-        
-        .water-animation {
-            background: linear-gradient(180deg, 
-                rgba(14, 165, 233, 0.1) 0%, 
-                rgba(14, 165, 233, 0.05) 100%);
-            animation: wave 3s ease-in-out infinite;
-        }
-        
-        @keyframes wave {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-5px); }
-        }
-        
-        .bubble {
-            position: absolute;
-            border-radius: 50%;
-            background: rgba(255, 255, 255, 0.3);
-            animation: float 4s ease-in-out infinite;
-        }
-        
-        @keyframes float {
-            0%, 100% { transform: translateY(0) scale(1); opacity: 0.7; }
-            50% { transform: translateY(-20px) scale(1.1); opacity: 1; }
-        }
-        
-        .gauge-container {
-            position: relative;
-            width: 200px;
-            height: 100px;
-            overflow: hidden;
-        }
-        
-        .gauge-bg {
-            width: 200px;
-            height: 200px;
-            border-radius: 50%;
-            background: conic-gradient(
-                #ef4444 0deg 36deg,
-                #f97316 36deg 72deg,
-                #eab308 72deg 108deg,
-                #84cc16 108deg 144deg,
-                #22c55e 144deg 180deg,
-                transparent 180deg 360deg
-            );
-        }
-        
-        .gauge-mask {
-            position: absolute;
-            top: 20px;
-            left: 20px;
-            width: 160px;
-            height: 160px;
-            border-radius: 50%;
-            background: white;
-        }
-        
-        .gauge-needle {
-            position: absolute;
-            bottom: 0;
-            left: 50%;
-            width: 4px;
-            height: 80px;
-            background: #1e293b;
-            transform-origin: bottom center;
-            transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1);
-            border-radius: 2px;
-        }
-        
-        .gauge-center {
-            position: absolute;
-            bottom: -10px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 20px;
-            height: 20px;
-            background: #1e293b;
-            border-radius: 50%;
-        }
-        
-        .quality-badge {
+
+        .card-hover {
             transition: all 0.3s ease;
         }
-        
-        .pulse {
-            animation: pulse 2s infinite;
+
+        .card-hover:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 40px rgba(35, 86, 167, 0.15);
         }
-        
-        @keyframes pulse {
-            0%, 100% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.4); }
-            50% { box-shadow: 0 0 0 15px rgba(34, 197, 94, 0); }
+
+        .nav-link {
+            position: relative;
         }
-        
-        input[type="range"] {
-            -webkit-appearance: none;
-            height: 8px;
-            border-radius: 4px;
-            background: #e2e8f0;
+
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            bottom: -4px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: #DB2927;
+            transition: width 0.3s ease;
         }
-        
-        input[type="range"]::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            width: 24px;
-            height: 24px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, #0ea5e9, #0284c7);
-            cursor: pointer;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+
+        .nav-link:hover::after {
+            width: 100%;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #2356A7 0%, #107EC2 100%);
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary:hover {
+            transform: scale(1.05);
+            box-shadow: 0 10px 30px rgba(35, 86, 167, 0.3);
+        }
+
+        .section-divider {
+            height: 4px;
+            background: linear-gradient(90deg, transparent, #2356A7, #DB2927, #2356A7, transparent);
+        }
+
+        .floating-leaf {
+            animation: float 6s ease-in-out infinite;
+        }
+
+        @keyframes float {
+
+            0%,
+            100% {
+                transform: translateY(0px) rotate(0deg);
+            }
+
+            50% {
+                transform: translateY(-20px) rotate(5deg);
+            }
+        }
+
+        .publication-card {
+            border-left: 4px solid #2356A7;
+        }
+
+        .timeline-dot {
+            width: 16px;
+            height: 16px;
+            background: #DB2927;
+            border: 3px solid #2356A7;
+        }
+
+        .stat-number {
+            background: linear-gradient(135deg, #2356A7, #107EC2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
     </style>
 </head>
-<body class="min-h-screen gradient-bg">
-    <!-- Header -->
-    <header class="py-6 px-4">
-        <div class="max-w-6xl mx-auto flex items-center justify-between">
-            <div class="flex items-center gap-3">
-                <div class="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
-                    <i class="fas fa-water text-white text-2xl"></i>
-                </div>
-                <div>
-                    <h1 class="text-white text-2xl font-bold">DO Calculator</h1>
-                    <p class="text-sky-100 text-sm">Dissolved Oxygen Index</p>
-                </div>
+
+<body class="bg-white text-gray-800">
+
+    <!-- Header Navigation -->
+    <header id="header"
+        class="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-md shadow-md transition-all duration-300">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center py-4">
+                <!-- Logo -->
+                <a href="#home" class="flex items-center space-x-3">
+                    <div
+                        class="w-12 h-12 rounded-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center">
+                        <span class="text-white font-bold text-xl">P</span>
+                    </div>
+                    <div>
+                        <h1 class="font-serif text-lg font-bold text-primary">Phạm Văn Hiệp</h1>
+                        <p class="text-xs text-secondary tracking-wider">GIẢNG VIÊN ĐH ĐỒNG THÁP</p>
+                    </div>
+                </a>
+
+                <!-- Desktop Navigation -->
+                <nav class="hidden md:flex items-center space-x-8">
+                    <a href="#home" class="nav-link text-primary font-medium hover:text-secondary">Trang chủ</a>
+                    <a href="#about" class="nav-link text-primary font-medium hover:text-secondary">Giới thiệu</a>
+                    <a href="#expertise" class="nav-link text-primary font-medium hover:text-secondary">Chuyên môn</a>
+                    <a href="#portfolio" class="nav-link text-primary font-medium hover:text-secondary">Sản phẩm</a>
+                    <a href="#publications" class="nav-link text-primary font-medium hover:text-secondary">Công bố</a>
+                    <a href="#contact" class="btn-primary text-white px-6 py-2 rounded-full font-medium shadow-lg">Liên
+                        hệ</a>
+                </nav>
+
+                <!-- Mobile Menu Button -->
+                <button id="mobileMenuBtn" class="md:hidden text-primary text-2xl">
+                    <i class="fas fa-bars"></i>
+                </button>
             </div>
-            <div class="hidden md:flex items-center gap-2 text-white/80 text-sm">
-                <i class="fas fa-leaf"></i>
-                <span>Environmental Monitoring System</span>
-            </div>
+        </div>
+
+        <!-- Mobile Navigation -->
+        <div id="mobileMenu" class="hidden md:hidden bg-white border-t">
+            <nav class="flex flex-col py-4 px-6 space-y-4">
+                <a href="#home" class="text-primary font-medium py-2">Trang chủ</a>
+                <a href="#about" class="text-primary font-medium py-2">Giới thiệu</a>
+                <a href="#expertise" class="text-primary font-medium py-2">Chuyên môn</a>
+                <a href="#portfolio" class="text-primary font-medium py-2">Sản phẩm</a>
+                <a href="#publications" class="text-primary font-medium py-2">Công bố</a>
+                <a href="#contact" class="btn-primary text-white px-6 py-2 rounded-full font-medium text-center">Liên
+                    hệ</a>
+            </nav>
         </div>
     </header>
 
-    <!-- Main Content -->
-    <main class="max-w-6xl mx-auto px-4 pb-12">
-        <div class="grid lg:grid-cols-3 gap-6">
-            <!-- Input Panel -->
-            <div class="lg:col-span-1">
-                <div class="glass-card rounded-2xl p-6 shadow-xl">
-                    <h2 class="text-lg font-semibold text-gray-800 mb-6 flex items-center gap-2">
-                        <i class="fas fa-sliders-h text-sky-500"></i>
-                        Thông số đầu vào
-                    </h2>
-                    
-                    <!-- DO Input -->
-                    <div class="mb-6">
-                        <label class="block text-sm font-medium text-gray-700 mb-2">
-                            <i class="fas fa-tint text-sky-500 mr-1"></i>
-                            Nồng độ DO đo được (mg/L)
-                        </label>
-                        <div class="flex items-center gap-3">
-                            <input type="range" id="doValue" min="0" max="15" step="0.1" value="7" 
-                                class="flex-1" oninput="updateDO(this.value)">
-                            <input type="number" id="doInput" value="7" min="0" max="20" step="0.1"
-                                class="w-20 px-3 py-2 border border-gray-200 rounded-lg text-center font-semibold text-sky-600"
-                                onchange="updateDOSlider(this.value)">
-                        </div>
-                        <p class="text-xs text-gray-500 mt-1">Phạm vi thông thường: 0 - 15 mg/L</p>
-                    </div>
-                    
-                    <!-- Temperature Input -->
-                    <div class="mb-6">
-                        <label class="block text-sm font-medium text-gray-700 mb-2">
-                            <i class="fas fa-thermometer-half text-orange-500 mr-1"></i>
-                            Nhiệt độ nước (°C)
-                        </label>
-                        <div class="flex items-center gap-3">
-                            <input type="range" id="tempValue" min="0" max="40" step="0.5" value="25" 
-                                class="flex-1" oninput="updateTemp(this.value)">
-                            <input type="number" id="tempInput" value="25" min="0" max="45" step="0.5"
-                                class="w-20 px-3 py-2 border border-gray-200 rounded-lg text-center font-semibold text-orange-600"
-                                onchange="updateTempSlider(this.value)">
-                        </div>
-                        <p class="text-xs text-gray-500 mt-1">Phạm vi: 0 - 40 °C</p>
-                    </div>
-                    
-                    <!-- Salinity Input -->
-                    <div class="mb-6">
-                        <label class="block text-sm font-medium text-gray-700 mb-2">
-                            <i class="fas fa-flask text-teal-500 mr-1"></i>
-                            Độ mặn (‰ PSU)
-                        </label>
-                        <div class="flex items-center gap-3">
-                            <input type="range" id="salinityValue" min="0" max="40" step="0.5" value="0" 
-                                class="flex-1" oninput="updateSalinity(this.value)">
-                            <input type="number" id="salinityInput" value="0" min="0" max="45" step="0.5"
-                                class="w-20 px-3 py-2 border border-gray-200 rounded-lg text-center font-semibold text-teal-600"
-                                onchange="updateSalinitySlider(this.value)">
-                        </div>
-                        <p class="text-xs text-gray-500 mt-1">Nước ngọt: 0 | Nước biển: ~35</p>
-                    </div>
-                    
-                    <!-- Calculate Button -->
-                    <button onclick="calculateDO()" 
-                        class="w-full py-3 bg-gradient-to-r from-sky-500 to-blue-600 text-white font-semibold rounded-xl hover:from-sky-600 hover:to-blue-700 transition-all shadow-lg hover:shadow-xl flex items-center justify-center gap-2">
-                        <i class="fas fa-calculator"></i>
-                        Tính toán chỉ số DO
-                    </button>
-                </div>
-                
-                <!-- Quick Info -->
-                <div class="glass-card rounded-2xl p-5 mt-6 shadow-xl">
-                    <h3 class="font-semibold text-gray-800 mb-3 flex items-center gap-2">
-                        <i class="fas fa-info-circle text-sky-500"></i>
-                        DO là gì?
-                    </h3>
-                    <p class="text-sm text-gray-600 leading-relaxed">
-                        <strong>Oxy hòa tan (DO)</strong> là lượng oxy có trong nước, đơn vị mg/L. 
-                        DO rất quan trọng cho sự sống của các sinh vật thủy sinh. Nồng độ DO phụ thuộc 
-                        vào nhiệt độ, áp suất và độ mặn của nước.
+    <!-- Hero Section -->
+    <section id="home" class="gradient-hero min-h-screen flex items-center pt-20 relative overflow-hidden">
+        <!-- Decorative Elements -->
+        <div class="absolute top-20 right-10 opacity-10 floating-leaf">
+            <i class="fas fa-microscope text-8xl text-white"></i>
+        </div>
+        <div class="absolute bottom-20 left-10 opacity-10 floating-leaf" style="animation-delay: -3s;">
+            <i class="fas fa-leaf text-6xl text-white"></i>
+        </div>
+
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
+            <div class="grid md:grid-cols-2 gap-12 items-center">
+                <!-- Text Content -->
+                <div class="text-white order-2 md:order-1">
+                    <p
+                        class="text-accent font-medium mb-4 tracking-wider uppercase bg-white/10 inline-block px-4 py-1 rounded-full backdrop-blur-sm">
+                        Giảng viên & Nhà nghiên cứu</p>
+                    <h1 class="font-serif text-4xl md:text-5xl lg:text-6xl font-bold mb-6 leading-tight">
+                        Kiến tạo nền <br>
+                        <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-200 to-white">Nông nghiệp
+                            Xanh</span>
+                    </h1>
+                    <p class="text-lg md:text-xl text-blue-100 mb-8 leading-relaxed max-w-lg">
+                        Kết hợp kiến thức <strong class="text-white">Côn trùng học</strong> chuyên sâu với giải pháp
+                        công nghệ <strong class="text-white">IoT hiện đại</strong> để giải quyết các thách thức nông
+                        nghiệp thực tiễn tại ĐBSCL.
                     </p>
-                </div>
-            </div>
-            
-            <!-- Results Panel -->
-            <div class="lg:col-span-2">
-                <!-- Main Result Card -->
-                <div class="glass-card rounded-2xl p-6 shadow-xl mb-6">
-                    <div class="flex flex-wrap items-start justify-between gap-4 mb-6">
+                    <div class="flex flex-wrap gap-4">
+                        <a href="#portfolio"
+                            class="bg-accent hover:bg-red-700 text-white px-8 py-4 rounded-full font-semibold transition-all transform hover:scale-105 shadow-lg flex items-center">
+                            <i class="fas fa-rocket mr-2"></i>Xem Sản phẩm
+                        </a>
+                        <a href="#contact"
+                            class="border-2 border-white/30 hover:border-white text-white px-8 py-4 rounded-full font-semibold transition-all hover:bg-white/10 flex items-center">
+                            <i class="fas fa-envelope mr-2"></i>Liên hệ ngay
+                        </a>
+                    </div>
+
+                    <!-- Stats inside Hero -->
+                    <div class="grid grid-cols-3 gap-6 mt-12 pt-8 border-t border-white/10">
                         <div>
-                            <h2 class="text-lg font-semibold text-gray-800 flex items-center gap-2">
-                                <i class="fas fa-chart-pie text-sky-500"></i>
-                                Kết quả phân tích
-                            </h2>
-                            <p class="text-sm text-gray-500 mt-1">Đánh giá chất lượng nước theo chỉ số DO</p>
+                            <p class="text-3xl font-bold text-white">15+</p>
+                            <p class="text-blue-200 text-sm mt-1">Năm kinh nghiệm</p>
                         </div>
-                        <div id="qualityBadge" class="quality-badge px-4 py-2 rounded-full text-sm font-semibold bg-green-100 text-green-700">
-                            <i class="fas fa-check-circle mr-1"></i>
-                            Tốt
+                        <div>
+                            <p class="text-3xl font-bold text-white">20+</p>
+                            <p class="text-blue-200 text-sm mt-1">Dự án KHCN</p>
                         </div>
-                    </div>
-                    
-                    <div class="grid md:grid-cols-2 gap-6">
-                        <!-- Gauge -->
-                        <div class="flex flex-col items-center">
-                            <div class="gauge-container mb-4">
-                                <div class="gauge-bg"></div>
-                                <div class="gauge-mask"></div>
-                                <div id="gaugeNeedle" class="gauge-needle" style="transform: rotate(-90deg);"></div>
-                                <div class="gauge-center"></div>
-                            </div>
-                            <div class="text-center">
-                                <div class="text-4xl font-bold text-gray-800" id="saturationValue">85%</div>
-                                <div class="text-sm text-gray-500">Độ bão hòa DO</div>
-                            </div>
-                        </div>
-                        
-                        <!-- Stats -->
-                        <div class="space-y-4">
-                            <div class="bg-sky-50 rounded-xl p-4">
-                                <div class="flex items-center justify-between">
-                                    <span class="text-sm text-gray-600">DO đo được</span>
-                                    <span class="text-xl font-bold text-sky-600" id="resultDO">7.0 mg/L</span>
-                                </div>
-                            </div>
-                            <div class="bg-orange-50 rounded-xl p-4">
-                                <div class="flex items-center justify-between">
-                                    <span class="text-sm text-gray-600">DO bão hòa (theo T°)</span>
-                                    <span class="text-xl font-bold text-orange-600" id="resultDOsat">8.26 mg/L</span>
-                                </div>
-                            </div>
-                            <div class="bg-teal-50 rounded-xl p-4">
-                                <div class="flex items-center justify-between">
-                                    <span class="text-sm text-gray-600">Thiếu hụt DO</span>
-                                    <span class="text-xl font-bold text-teal-600" id="resultDeficit">1.26 mg/L</span>
-                                </div>
-                            </div>
+                        <div>
+                            <p class="text-3xl font-bold text-white">100+</p>
+                            <p class="text-blue-200 text-sm mt-1">Sinh viên tốt nghiệp</p>
                         </div>
                     </div>
                 </div>
-                
-                <!-- Chart & Standards -->
-                <div class="grid md:grid-cols-2 gap-6">
-                    <!-- Chart -->
-                    <div class="glass-card rounded-2xl p-5 shadow-xl">
-                        <h3 class="font-semibold text-gray-800 mb-4 flex items-center gap-2">
-                            <i class="fas fa-chart-line text-sky-500"></i>
-                            Biểu đồ DO bão hòa theo nhiệt độ
-                        </h3>
-                        <canvas id="doChart" height="200"></canvas>
-                    </div>
-                    
-                    <!-- Standards Table -->
-                    <div class="glass-card rounded-2xl p-5 shadow-xl">
-                        <h3 class="font-semibold text-gray-800 mb-4 flex items-center gap-2">
-                            <i class="fas fa-clipboard-list text-sky-500"></i>
-                            Tiêu chuẩn QCVN 08:2023
-                        </h3>
-                        <div class="space-y-2 text-sm">
-                            <div class="flex items-center p-2 rounded-lg bg-green-50 border-l-4 border-green-500">
-                                <span class="w-16 font-semibold text-green-700">A1</span>
-                                <span class="text-gray-600">DO ≥ 6 mg/L - Nước sinh hoạt</span>
-                            </div>
-                            <div class="flex items-center p-2 rounded-lg bg-lime-50 border-l-4 border-lime-500">
-                                <span class="w-16 font-semibold text-lime-700">A2</span>
-                                <span class="text-gray-600">DO ≥ 5 mg/L - Cấp nước sinh hoạt</span>
-                            </div>
-                            <div class="flex items-center p-2 rounded-lg bg-yellow-50 border-l-4 border-yellow-500">
-                                <span class="w-16 font-semibold text-yellow-700">B1</span>
-                                <span class="text-gray-600">DO ≥ 4 mg/L - Tưới tiêu, thủy lợi</span>
-                            </div>
-                            <div class="flex items-center p-2 rounded-lg bg-orange-50 border-l-4 border-orange-500">
-                                <span class="w-16 font-semibold text-orange-700">B2</span>
-                                <span class="text-gray-600">DO ≥ 2 mg/L - Giao thông thủy</span>
-                            </div>
-                            <div class="flex items-center p-2 rounded-lg bg-red-50 border-l-4 border-red-500">
-                                <span class="w-16 font-semibold text-red-700">Kém</span>
-                                <span class="text-gray-600">DO < 2 mg/L - Ô nhiễm nặng</span>
+
+                <!-- Profile Image -->
+                <div class="order-1 md:order-2 flex justify-center">
+                    <div class="relative">
+                        <div
+                            class="w-72 h-72 md:w-96 md:h-96 rounded-full bg-gradient-to-br from-blue-400 to-primary p-2 animate-pulse-slow">
+                            <div
+                                class="w-full h-full rounded-full bg-white flex items-center justify-center overflow-hidden border-4 border-accent relative">
+                                <img src="assets/images/avatar.jpg" alt="Phạm Văn Hiệp"
+                                    class="w-full h-full object-cover hover:scale-110 transition-transform duration-700">
                             </div>
                         </div>
-                    </div>
-                </div>
-                
-                <!-- Aquatic Life Impact -->
-                <div class="glass-card rounded-2xl p-5 mt-6 shadow-xl">
-                    <h3 class="font-semibold text-gray-800 mb-4 flex items-center gap-2">
-                        <i class="fas fa-fish text-sky-500"></i>
-                        Ảnh hưởng đến sinh vật thủy sinh
-                    </h3>
-                    <div class="grid grid-cols-2 md:grid-cols-5 gap-3" id="aquaticImpact">
-                        <div class="text-center p-3 rounded-xl bg-red-100">
-                            <div class="text-2xl mb-1">💀</div>
-                            <div class="text-xs font-semibold text-red-700">0-2 mg/L</div>
-                            <div class="text-xs text-gray-600">Chết hàng loạt</div>
+                        <!-- Badge -->
+                        <div
+                            class="absolute bottom-6 -right-2 bg-white text-primary px-6 py-3 rounded-full shadow-xl border border-blue-100">
+                            <div class="flex items-center gap-3">
+                                <div
+                                    class="bg-accent text-white w-10 h-10 rounded-full flex items-center justify-center">
+                                    <i class="fas fa-check"></i>
+                                </div>
+                                <div>
+                                    <p class="text-xs text-gray-500">Chuyên gia</p>
+                                    <p class="font-bold text-sm">IPM & IoT Nông nghiệp</p>
+                                </div>
+                            </div>
                         </div>
-                        <div class="text-center p-3 rounded-xl bg-orange-100">
-                            <div class="text-2xl mb-1">😰</div>
-                            <div class="text-xs font-semibold text-orange-700">2-4 mg/L</div>
-                            <div class="text-xs text-gray-600">Stress nặng</div>
-                        </div>
-                        <div class="text-center p-3 rounded-xl bg-yellow-100">
-                            <div class="text-2xl mb-1">😟</div>
-                            <div class="text-xs font-semibold text-yellow-700">4-5 mg/L</div>
-                            <div class="text-xs text-gray-600">Stress nhẹ</div>
-                        </div>
-                        <div class="text-center p-3 rounded-xl bg-lime-100">
-                            <div class="text-2xl mb-1">🐟</div>
-                            <div class="text-xs font-semibold text-lime-700">5-6 mg/L</div>
-                            <div class="text-xs text-gray-600">Chấp nhận</div>
-                        </div>
-                        <div class="text-center p-3 rounded-xl bg-green-100 ring-2 ring-green-400" id="optimalZone">
-                            <div class="text-2xl mb-1">🐠</div>
-                            <div class="text-xs font-semibold text-green-700">> 6 mg/L</div>
-                            <div class="text-xs text-gray-600">Tối ưu</div>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- History Log -->
-                <div class="glass-card rounded-2xl p-5 mt-6 shadow-xl">
-                    <div class="flex items-center justify-between mb-4">
-                        <h3 class="font-semibold text-gray-800 flex items-center gap-2">
-                            <i class="fas fa-history text-sky-500"></i>
-                            Lịch sử đo gần đây
-                        </h3>
-                        <button onclick="clearHistory()" class="text-sm text-gray-500 hover:text-red-500 transition">
-                            <i class="fas fa-trash-alt mr-1"></i>Xóa
-                        </button>
-                    </div>
-                    <div id="historyLog" class="space-y-2 max-h-48 overflow-y-auto">
-                        <p class="text-sm text-gray-400 text-center py-4">Chưa có dữ liệu</p>
                     </div>
                 </div>
             </div>
         </div>
-    </main>
-    
+    </section>
+
+    <!-- About Section -->
+    <section id="about" class="py-20 gradient-section">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <p class="text-accent font-medium mb-2 tracking-wider uppercase">Về tôi</p>
+                <h2 class="font-serif text-3xl md:text-4xl font-bold text-primary mb-4">Giảng viên & Nhà nghiên cứu</h2>
+                <div class="w-24 h-1 bg-gradient-to-r from-primary to-accent mx-auto"></div>
+            </div>
+
+            <div class="grid md:grid-cols-2 gap-12 items-start">
+                <div class="relative">
+                    <div class="bg-white rounded-2xl shadow-xl p-8 border-l-4 border-primary">
+                        <div class="flex items-center mb-6">
+                            <div
+                                class="w-16 h-16 rounded-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center mr-4 shadow-md">
+                                <i class="fas fa-user-graduate text-white text-2xl"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-serif text-xl font-bold text-primary">ThS. Phạm Văn Hiệp</h3>
+                                <p class="text-secondary font-medium">Bộ môn Nông học – Khoa Nông nghiệp, TN & MT</p>
+                            </div>
+                        </div>
+
+                        <div class="space-y-4 text-gray-600 leading-relaxed">
+                            <p>
+                                Tôi là giảng viên tại <strong class="text-primary">Trường Đại học Đồng Tháp</strong> với
+                                hơn 15 năm kinh nghiệm. Niềm đam mê của tôi là kết hợp kiến thức sinh học cơ bản với
+                                công nghệ hiện đại.
+                            </p>
+                            <ul class="space-y-2">
+                                <li class="flex items-start">
+                                    <i class="fas fa-check-circle text-accent mt-1 mr-2"></i>
+                                    <span>Nghiên cứu chuyên sâu về đặc điểm sinh học côn trùng và biện pháp quản lý dịch
+                                        hại tổng hợp (IPM).</span>
+                                </li>
+                                <li class="flex items-start">
+                                    <i class="fas fa-check-circle text-accent mt-1 mr-2"></i>
+                                    <span>Phát triển các giải pháp IoT giám sát nông nghiệp và dự báo khí hậu.</span>
+                                </li>
+                                <li class="flex items-start">
+                                    <i class="fas fa-check-circle text-accent mt-1 mr-2"></i>
+                                    <span>Giảng dạy và hướng dẫn sinh viên nghiên cứu khoa học.</span>
+                                </li>
+                            </ul>
+
+                            <div class="pt-6 mt-6 border-t border-gray-100 grid grid-cols-2 gap-4">
+                                <div>
+                                    <p class="text-xs text-gray-500 uppercase">Email</p>
+                                    <a href="mailto:pvhiep@dthu.edu.vn"
+                                        class="text-primary font-medium hover:text-accent">pvhiep@dthu.edu.vn</a>
+                                </div>
+                                <div>
+                                    <p class="text-xs text-gray-500 uppercase">Điện thoại</p>
+                                    <p class="text-primary font-medium">+84 945 193 968</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid gap-6">
+                    <!-- Expertise Cards -->
+                    <div class="bg-white rounded-xl shadow-lg p-6 card-hover border border-gray-100">
+                        <div class="flex items-start mb-4">
+                            <div
+                                class="w-12 h-12 rounded-lg bg-blue-50 flex items-center justify-center mr-4 flex-shrink-0">
+                                <i class="fas fa-bug text-primary text-xl"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-bold text-primary text-lg mb-2">Côn Trùng Học & IPM</h3>
+                                <p class="text-sm text-gray-600">Nghiên cứu đặc điểm sinh học côn trùng gây hại, thiên
+                                    địch và các biện pháp quản lý dịch hại bền vững.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-xl shadow-lg p-6 card-hover border border-gray-100">
+                        <div class="flex items-start mb-4">
+                            <div
+                                class="w-12 h-12 rounded-lg bg-red-50 flex items-center justify-center mr-4 flex-shrink-0">
+                                <i class="fas fa-wifi text-accent text-xl"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-bold text-primary text-lg mb-2">Nông Nghiệp Thông Minh</h3>
+                                <p class="text-sm text-gray-600">Ứng dụng IoT, cảm biến để giám sát môi trường, dự báo
+                                    sâu bệnh và tự động hóa sản xuất.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-xl shadow-lg p-6 card-hover border border-gray-100">
+                        <div class="flex items-start mb-4">
+                            <div
+                                class="w-12 h-12 rounded-lg bg-green-50 flex items-center justify-center mr-4 flex-shrink-0">
+                                <i class="fas fa-chalkboard-teacher text-green-600 text-xl"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-bold text-primary text-lg mb-2">Giảng Dạy & Đào Tạo</h3>
+                                <p class="text-sm text-gray-600">Truyền đạt kiến thức Nông học, hướng dẫn sinh viên thực
+                                    hiện đề tài tốt nghiệp và nghiên cứu khoa học.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Section Divider -->
+    <div class="section-divider"></div>
+
+    <!-- Portfolio Section -->
+    <section id="portfolio" class="py-20 bg-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <p class="text-accent font-medium mb-2 tracking-wider uppercase">Sản phẩm & Giải pháp</p>
+                <h2 class="font-serif text-3xl md:text-4xl font-bold text-primary mb-4">Công Nghệ Ứng Dụng</h2>
+                <div class="w-24 h-1 bg-gradient-to-r from-primary to-accent mx-auto mb-6"></div>
+                <p class="text-gray-600 max-w-2xl mx-auto">Các giải pháp công nghệ đã được phát triển và ứng dụng vào
+                    thực tế sản xuất</p>
+            </div>
+
+            <div class="grid md:grid-cols-3 gap-8">
+                <!-- Project 1 -->
+                <div
+                    class="group bg-white rounded-2xl shadow-lg overflow-hidden border border-gray-100 hover:shadow-2xl transition-all duration-300">
+                    <div
+                        class="h-48 bg-gradient-to-br from-primary to-blue-400 flex items-center justify-center relative overflow-hidden">
+                        <div class="absolute inset-0 bg-black/10 group-hover:bg-transparent transition-all"></div>
+                        <i
+                            class="fas fa-satellite-dish text-white/20 text-9xl absolute -bottom-4 -right-4 transform group-hover:scale-110 transition-transform duration-500"></i>
+                        <div class="relative z-10 text-center text-white">
+                            <i class="fas fa-wifi text-5xl mb-3 drop-shadow-md"></i>
+                            <h3 class="font-bold text-xl">Bẫy Côn Trùng IoT</h3>
+                        </div>
+                    </div>
+                    <div class="p-6">
+                        <p class="text-gray-600 text-sm mb-4">Hệ thống bẫy đèn thông minh tự động giám sát, đếm và nhận
+                            diện mật độ côn trùng gây hại trên đồng ruộng, gửi dữ liệu về smartphone.</p>
+                        <a href="#" class="text-primary font-bold text-sm hover:text-accent flex items-center">
+                            Tìm hiểu thêm <i class="fas fa-arrow-right ml-2 text-xs"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Project 2 -->
+                <div
+                    class="group bg-white rounded-2xl shadow-lg overflow-hidden border border-gray-100 hover:shadow-2xl transition-all duration-300">
+                    <div
+                        class="h-48 bg-gradient-to-br from-secondary to-cyan-300 flex items-center justify-center relative overflow-hidden">
+                        <i
+                            class="fas fa-cloud-sun text-white/20 text-9xl absolute -bottom-4 -right-4 transform group-hover:scale-110 transition-transform duration-500"></i>
+                        <div class="relative z-10 text-center text-white">
+                            <i class="fas fa-temperature-high text-5xl mb-3 drop-shadow-md"></i>
+                            <h3 class="font-bold text-xl">Dự Báo Vi Khí Hậu</h3>
+                        </div>
+                    </div>
+                    <div class="p-6">
+                        <p class="text-gray-600 text-sm mb-4">Trạm quan trắc mini đo nhiệt độ, độ ẩm, ánh sáng tiểu khí
+                            hậu ruộng lúa. Cảnh báo nguy cơ dịch bệnh đạo ôn, rầy nâu sớm.</p>
+                        <a href="#" class="text-primary font-bold text-sm hover:text-accent flex items-center">
+                            Tìm hiểu thêm <i class="fas fa-arrow-right ml-2 text-xs"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Project 3 -->
+                <div
+                    class="group bg-white rounded-2xl shadow-lg overflow-hidden border border-gray-100 hover:shadow-2xl transition-all duration-300">
+                    <div
+                        class="h-48 bg-gradient-to-br from-accent to-red-400 flex items-center justify-center relative overflow-hidden">
+                        <i
+                            class="fas fa-book text-white/20 text-9xl absolute -bottom-4 -right-4 transform group-hover:scale-110 transition-transform duration-500"></i>
+                        <div class="relative z-10 text-center text-white">
+                            <i class="fas fa-mobile-alt text-5xl mb-3 drop-shadow-md"></i>
+                            <h3 class="font-bold text-xl">Giáo Trình Số</h3>
+                        </div>
+                    </div>
+                    <div class="p-6">
+                        <p class="text-gray-600 text-sm mb-4">Ứng dụng di động tra cứu côn trùng, thư viện học liệu số
+                            hóa 3D phục vụ sinh viên và nông dân tra cứu nhanh chóng.</p>
+                        <a href="#" class="text-primary font-bold text-sm hover:text-accent flex items-center">
+                            Tìm hiểu thêm <i class="fas fa-arrow-right ml-2 text-xs"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Publications Section -->
+    <section id="publications" class="py-20 bg-gray-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <p class="text-secondary font-medium mb-2 tracking-wider uppercase">Nghiên cứu</p>
+                <h2 class="font-serif text-3xl md:text-4xl font-bold text-primary mb-4">Công Bố Khoa Học</h2>
+                <div class="w-24 h-1 bg-gradient-to-r from-primary to-secondary mx-auto mb-6"></div>
+            </div>
+
+            <div class="space-y-6">
+                <!-- Pub 1 -->
+                <div
+                    class="bg-white rounded-xl shadow p-6 border-l-4 border-primary hover:shadow-lg transition-all flex flex-col md:flex-row gap-6 items-start">
+                    <div
+                        class="w-16 h-16 rounded-lg bg-blue-50 text-primary font-bold text-2xl flex items-center justify-center flex-shrink-0">
+                        01
+                    </div>
+                    <div>
+                        <div class="flex flex-wrap gap-2 mb-2">
+                            <span class="bg-primary text-white text-xs px-2 py-1 rounded">2023</span>
+                            <span class="bg-gray-100 text-gray-600 text-xs px-2 py-1 rounded">Tạp chí KHNN VN</span>
+                        </div>
+                        <h3 class="font-bold text-lg text-gray-800 mb-2">Nghiên cứu đặc điểm sinh học sâu hại lúa
+                            (Nilaparvata lugens) và biệp pháp phòng trừ</h3>
+                        <p class="text-sm text-gray-600 italic">Tác giả: <strong>Phạm Văn Hiệp</strong>, Nguyễn Văn A,
+                            Trần Văn B.</p>
+                    </div>
+                </div>
+
+                <!-- Pub 2 -->
+                <div
+                    class="bg-white rounded-xl shadow p-6 border-l-4 border-secondary hover:shadow-lg transition-all flex flex-col md:flex-row gap-6 items-start">
+                    <div
+                        class="w-16 h-16 rounded-lg bg-cyan-50 text-secondary font-bold text-2xl flex items-center justify-center flex-shrink-0">
+                        02
+                    </div>
+                    <div>
+                        <div class="flex flex-wrap gap-2 mb-2">
+                            <span class="bg-secondary text-white text-xs px-2 py-1 rounded">2022</span>
+                            <span class="bg-gray-100 text-gray-600 text-xs px-2 py-1 rounded">Bảo vệ thực vật</span>
+                        </div>
+                        <h3 class="font-bold text-lg text-gray-800 mb-2">Hiệu quả của chế phẩm nấm xanh (Metarhizium
+                            anisopliae) đối với rầy nâu hại lúa tại Đồng Tháp</h3>
+                        <p class="text-sm text-gray-600 italic">Tác giả: <strong>Phạm Văn Hiệp</strong> et al.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section id="contact" class="py-20 gradient-hero text-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid md:grid-cols-2 gap-16">
+                <div>
+                    <h2 class="font-serif text-3xl font-bold mb-6">Liên Hệ Hợp Tác</h2>
+                    <p class="text-blue-200 mb-8 leading-relaxed">
+                        Tôi luôn sẵn sàng trao đổi về các cơ hội hợp tác nghiên cứu, chuyển giao công nghệ và tư vấn
+                        giải pháp nông nghiệp.
+                    </p>
+                    <div class="space-y-6">
+                        <div class="flex items-center gap-4">
+                            <div class="w-12 h-12 bg-white/10 rounded-full flex items-center justify-center">
+                                <i class="fas fa-map-marker-alt text-accent"></i>
+                            </div>
+                            <div>
+                                <p class="text-sm text-blue-300">Địa chỉ làm việc</p>
+                                <p class="font-medium">P.205, Nhà A1, Trường Đại học Đồng Tháp</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-4">
+                            <div class="w-12 h-12 bg-white/10 rounded-full flex items-center justify-center">
+                                <i class="fas fa-phone text-accent"></i>
+                            </div>
+                            <div>
+                                <p class="text-sm text-blue-300">Điện thoại / Zalo</p>
+                                <p class="font-medium text-lg">+84 945 193 968</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-4">
+                            <div class="w-12 h-12 bg-white/10 rounded-full flex items-center justify-center">
+                                <i class="fas fa-envelope text-accent"></i>
+                            </div>
+                            <div>
+                                <p class="text-sm text-blue-300">Email</p>
+                                <p class="font-medium">pvhiep@dthu.edu.vn</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-2xl p-8 text-gray-800 shadow-2xl">
+                    <form class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-bold mb-2 text-primary">Họ tên</label>
+                            <input type="text"
+                                class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary outline-none transition-all"
+                                placeholder="Nhập tên của bạn">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-bold mb-2 text-primary">Email</label>
+                            <input type="email"
+                                class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary outline-none transition-all"
+                                placeholder="email@example.com">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-bold mb-2 text-primary">Lời nhắn</label>
+                            <textarea rows="4"
+                                class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary outline-none transition-all"
+                                placeholder="Nội dung trao đổi..."></textarea>
+                        </div>
+                        <button
+                            class="w-full bg-primary text-white font-bold py-4 rounded-lg hover:bg-blue-800 transition-all shadow-lg transform hover:-translate-y-1">
+                            Gửi Tin Nhắn
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+
     <!-- Footer -->
-    <footer class="py-6 text-center text-white/70 text-sm">
-        <p>© 2024 Environmental Monitoring System | DO Calculator v1.0</p>
-        <p class="mt-1">Dựa trên QCVN 08:2023/BTNMT - Quy chuẩn kỹ thuật quốc gia về chất lượng nước mặt</p>
+    <footer class="bg-slate-900 text-white py-8 text-center border-t border-slate-800">
+        <p>&copy; 2024 Pham Van Hiep. Designed for Education & Agriculture.</p>
     </footer>
 
     <script>
-        let chart;
-        let history = [];
-        
-        // Initialize
-        document.addEventListener('DOMContentLoaded', function() {
-            initChart();
-            calculateDO();
+        // Mobile Menu Toggle
+        const btn = document.getElementById('mobileMenuBtn');
+        const menu = document.getElementById('mobileMenu');
+        btn.addEventListener('click', () => {
+            menu.classList.toggle('hidden');
         });
-        
-        // Update functions for sliders
-        function updateDO(value) {
-            document.getElementById('doInput').value = value;
-        }
-        
-        function updateDOSlider(value) {
-            document.getElementById('doValue').value = Math.min(15, Math.max(0, value));
-        }
-        
-        function updateTemp(value) {
-            document.getElementById('tempInput').value = value;
-        }
-        
-        function updateTempSlider(value) {
-            document.getElementById('tempValue').value = Math.min(40, Math.max(0, value));
-        }
-        
-        function updateSalinity(value) {
-            document.getElementById('salinityInput').value = value;
-        }
-        
-        function updateSalinitySlider(value) {
-            document.getElementById('salinityValue').value = Math.min(40, Math.max(0, value));
-        }
-        
-        // Calculate saturated DO using Weiss (1970) equation
-        function calculateDOsat(temp, salinity) {
-            const T = temp + 273.15; // Convert to Kelvin
-            const S = salinity;
-            
-            // Weiss equation coefficients
-            const A1 = -173.4292;
-            const A2 = 249.6339;
-            const A3 = 143.3483;
-            const A4 = -21.8492;
-            const B1 = -0.033096;
-            const B2 = 0.014259;
-            const B3 = -0.0017000;
-            
-            const lnDOsat = A1 + A2 * (100/T) + A3 * Math.log(T/100) + A4 * (T/100) +
-                           S * (B1 + B2 * (T/100) + B3 * Math.pow(T/100, 2));
-            
-            return Math.exp(lnDOsat);
-        }
-        
-        // Main calculation function
-        function calculateDO() {
-            const doMeasured = parseFloat(document.getElementById('doInput').value);
-            const temp = parseFloat(document.getElementById('tempInput').value);
-            const salinity = parseFloat(document.getElementById('salinityInput').value);
-            
-            // Calculate saturated DO
-            const doSat = calculateDOsat(temp, salinity);
-            
-            // Calculate saturation percentage
-            const saturation = (doMeasured / doSat) * 100;
-            
-            // Calculate deficit
-            const deficit = Math.max(0, doSat - doMeasured);
-            
-            // Update UI
-            document.getElementById('resultDO').textContent = doMeasured.toFixed(2) + ' mg/L';
-            document.getElementById('resultDOsat').textContent = doSat.toFixed(2) + ' mg/L';
-            document.getElementById('resultDeficit').textContent = deficit.toFixed(2) + ' mg/L';
-            document.getElementById('saturationValue').textContent = saturation.toFixed(1) + '%';
-            
-            // Update gauge
-            updateGauge(saturation);
-            
-            // Update quality badge
-            updateQualityBadge(doMeasured);
-            
-            // Update chart marker
-            updateChartMarker(temp, doMeasured, doSat);
-            
-            // Highlight aquatic impact zone
-            highlightImpactZone(doMeasured);
-            
-            // Add to history
-            addToHistory(doMeasured, temp, salinity, saturation);
-        }
-        
-        // Update gauge needle
-        function updateGauge(saturation) {
-            const needle = document.getElementById('gaugeNeedle');
-            // Map saturation (0-150%) to angle (-90 to 90 degrees)
-            const clampedSat = Math.min(150, Math.max(0, saturation));
-            const angle = -90 + (clampedSat / 150) * 180;
-            needle.style.transform = `rotate(${angle}deg)`;
-        }
-        
-        // Update quality badge
-        function updateQualityBadge(doValue) {
-            const badge = document.getElementById('qualityBadge');
-            let text, bgClass, icon;
-            
-            if (doValue >= 6) {
-                text = 'Rất tốt (A1)';
-                bgClass = 'bg-green-100 text-green-700';
-                icon = 'check-circle';
-            } else if (doValue >= 5) {
-                text = 'Tốt (A2)';
-                bgClass = 'bg-lime-100 text-lime-700';
-                icon = 'check';
-            } else if (doValue >= 4) {
-                text = 'Trung bình (B1)';
-                bgClass = 'bg-yellow-100 text-yellow-700';
-                icon = 'exclamation';
-            } else if (doValue >= 2) {
-                text = 'Kém (B2)';
-                bgClass = 'bg-orange-100 text-orange-700';
-                icon = 'exclamation-triangle';
+
+        // Header Scroll Effect
+        window.addEventListener('scroll', () => {
+            const header = document.getElementById('header');
+            if (window.scrollY > 50) {
+                header.classList.add('shadow-md', 'bg-white/95');
             } else {
-                text = 'Ô nhiễm nặng';
-                bgClass = 'bg-red-100 text-red-700';
-                icon = 'times-circle';
+                header.classList.remove('shadow-md');
             }
-            
-            badge.className = `quality-badge px-4 py-2 rounded-full text-sm font-semibold ${bgClass}`;
-            badge.innerHTML = `<i class="fas fa-${icon} mr-1"></i>${text}`;
-            
-            if (doValue >= 6) {
-                badge.classList.add('pulse');
-            } else {
-                badge.classList.remove('pulse');
-            }
-        }
-        
-        // Highlight impact zone
-        function highlightImpactZone(doValue) {
-            const zones = document.querySelectorAll('#aquaticImpact > div');
-            zones.forEach(zone => {
-                zone.classList.remove('ring-2', 'ring-offset-2');
-            });
-            
-            let activeIndex;
-            if (doValue < 2) activeIndex = 0;
-            else if (doValue < 4) activeIndex = 1;
-            else if (doValue < 5) activeIndex = 2;
-            else if (doValue < 6) activeIndex = 3;
-            else activeIndex = 4;
-            
-            const colors = ['ring-red-400', 'ring-orange-400', 'ring-yellow-400', 'ring-lime-400', 'ring-green-400'];
-            zones[activeIndex].classList.add('ring-2', 'ring-offset-2', colors[activeIndex]);
-        }
-        
-        // Initialize chart
-        function initChart() {
-            const ctx = document.getElementById('doChart').getContext('2d');
-            
-            // Generate DO saturation curve data
-            const temps = [];
-            const doSatValues = [];
-            for (let t = 0; t <= 40; t += 2) {
-                temps.push(t);
-                doSatValues.push(calculateDOsat(t, 0));
-            }
-            
-            chart = new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: temps,
-                    datasets: [{
-                        label: 'DO bão hòa (mg/L)',
-                        data: doSatValues,
-                        borderColor: '#0ea5e9',
-                        backgroundColor: 'rgba(14, 165, 233, 0.1)',
-                        fill: true,
-                        tension: 0.4,
-                        pointRadius: 0
-                    }, {
-                        label: 'Điểm đo hiện tại',
-                        data: [],
-                        borderColor: '#ef4444',
-                        backgroundColor: '#ef4444',
-                        pointRadius: 8,
-                        pointStyle: 'star',
-                        showLine: false
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            position: 'bottom',
-                            labels: {
-                                boxWidth: 12,
-                                font: { size: 10 }
-                            }
-                        }
-                    },
-                    scales: {
-                        x: {
-                            title: {
-                                display: true,
-                                text: 'Nhiệt độ (°C)',
-                                font: { size: 10 }
-                            }
-                        },
-                        y: {
-                            title: {
-                                display: true,
-                                text: 'DO (mg/L)',
-                                font: { size: 10 }
-                            },
-                            min: 0,
-                            max: 16
-                        }
-                    }
-                }
-            });
-        }
-        
-        // Update chart marker
-        function updateChartMarker(temp, doMeasured, doSat) {
-            // Find index for current temp
-            const tempIndex = Math.round(temp / 2);
-            
-            // Update measured point
-            const pointData = new Array(21).fill(null);
-            pointData[tempIndex] = doMeasured;
-            
-            chart.data.datasets[1].data = pointData;
-            chart.update();
-        }
-        
-        // Add to history
-        function addToHistory(doValue, temp, salinity, saturation) {
-            const now = new Date();
-            const timeStr = now.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
-            
-            history.unshift({
-                time: timeStr,
-                do: doValue,
-                temp: temp,
-                salinity: salinity,
-                saturation: saturation
-            });
-            
-            // Keep only last 10 entries
-            if (history.length > 10) history.pop();
-            
-            renderHistory();
-        }
-        
-        // Render history
-        function renderHistory() {
-            const container = document.getElementById('historyLog');
-            
-            if (history.length === 0) {
-                container.innerHTML = '<p class="text-sm text-gray-400 text-center py-4">Chưa có dữ liệu</p>';
-                return;
-            }
-            
-            container.innerHTML = history.map((item, index) => {
-                const qualityColor = item.do >= 6 ? 'text-green-600' : 
-                                    item.do >= 4 ? 'text-yellow-600' : 'text-red-600';
-                return `
-                    <div class="flex items-center justify-between p-2 rounded-lg ${index === 0 ? 'bg-sky-50' : 'bg-gray-50'}">
-                        <span class="text-xs text-gray-500">${item.time}</span>
-                        <span class="font-semibold ${qualityColor}">${item.do.toFixed(1)} mg/L</span>
-                        <span class="text-xs text-gray-500">${item.temp}°C</span>
-                        <span class="text-xs text-gray-500">${item.saturation.toFixed(0)}%</span>
-                    </div>
-                `;
-            }).join('');
-        }
-        
-        // Clear history
-        function clearHistory() {
-            history = [];
-            renderHistory();
-        }
+        });
     </script>
 </body>
+
 </html>
